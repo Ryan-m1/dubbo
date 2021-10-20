@@ -1,3 +1,5 @@
+搭建Dubbo源码阅读环境
+
 # Apache Dubbo Project
 
 [![Build Status](https://github.com/apache/dubbo/workflows/Build%20and%20Test/badge.svg?branch=master)](https://github.com/apache/dubbo/actions/workflows/build-and-test.yml?query=branch%3Amaster+)
