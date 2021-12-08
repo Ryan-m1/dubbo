@@ -224,7 +224,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         if (!shouldExport()) {
             return;
         }
-
+        //延迟暴露
         if (shouldDelay()) {
             DELAY_EXPORT_EXECUTOR.schedule(() -> {
                 try {
@@ -235,6 +235,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                 }
             }, getDelay(), TimeUnit.MILLISECONDS);
         } else {
+            //立刻暴露
             doExport();
         }
 
