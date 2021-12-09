@@ -93,25 +93,53 @@ import static org.apache.dubbo.common.utils.StringUtils.isBlank;
  * @see java.net.URL
  * @see java.net.URI
  */
+
+/**
+ * 所有配置最终都将转换为 Dubbo URL 表示，并由服务提供方生成，经注册中心传递给消费方，各属性对应 URL 的参数
+ * 例如：
+ * Service 注册到注册中心的格式如下
+ * dubbo://192.168.3.17:20880/com.alibaba.dubbo.demo.DemoService?anyhost=true&application=demo-provider&default.delay=-1&default.retries=0&default.service.filter=demoFilter&delay=-1&dubbo=2.0.0&generic=false&interface=com.alibaba.dubbo.demo.DemoService&methods=sayHello&pid=19031&side=provider&timestamp=1519651641799
+ */
 public /*final**/
 class URL implements Serializable {
 
     private static final long serialVersionUID = -1985165475234910535L;
 
+    /**
+     * 协议名
+     */
     protected String protocol;
 
+    /**
+     * 用户名
+     */
     protected String username;
 
+    /**
+     * 密码
+     */
     protected String password;
 
-    // by default, host to registry
+    /**
+     * by default, host to registry
+     * 地址
+     */
     protected String host;
 
-    // by default, port to registry
+    /**
+     * by default, port to registry
+     * 端口
+     */
     protected int port;
 
+    /**
+     * 路径（服务名）
+     */
     protected String path;
 
+    /**
+     * 参数集合
+     */
     private final Map<String, String> parameters;
 
     private final Map<String, Map<String, String>> methodParameters;
@@ -183,24 +211,11 @@ class URL implements Serializable {
         this(protocol, username, password, host, port, path, CollectionUtils.toStringMap(pairs));
     }
 
-    public URL(String protocol,
-               String username,
-               String password,
-               String host,
-               int port,
-               String path,
-               Map<String, String> parameters) {
+    public URL(String protocol, String username, String password, String host, int port, String path, Map<String, String> parameters) {
         this(protocol, username, password, host, port, path, parameters, toMethodParameters(parameters));
     }
 
-    public URL(String protocol,
-               String username,
-               String password,
-               String host,
-               int port,
-               String path,
-               Map<String, String> parameters,
-               Map<String, Map<String, String>> methodParameters) {
+    public URL(String protocol, String username, String password, String host, int port, String path, Map<String, String> parameters, Map<String, Map<String, String>> methodParameters) {
         this.protocol = protocol;
         this.username = username;
         this.password = password;
@@ -343,9 +358,7 @@ class URL implements Serializable {
                 for (int i = 0; i < methods.size(); i++) {
                     String method = methods.get(i);
                     int methodLen = method.length();
-                    if (key.length() > methodLen
-                            && key.startsWith(method)
-                            && key.charAt(methodLen) == '.') {//equals to: key.startsWith(method + '.')
+                    if (key.length() > methodLen && key.startsWith(method) && key.charAt(methodLen) == '.') {//equals to: key.startsWith(method + '.')
                         String realKey = key.substring(methodLen + 1);
                         URL.putMethodParameter(method, realKey, entry.getValue(), methodParameters);
                     }
@@ -402,8 +415,7 @@ class URL implements Serializable {
                 }
             }
         }
-        return newMap.isEmpty() ? new URL(url.getProtocol(), url.getUsername(), url.getPassword(), url.getHost(), url.getPort(), url.getPath())
-                : new URL(url.getProtocol(), url.getUsername(), url.getPassword(), url.getHost(), url.getPort(), url.getPath(), newMap);
+        return newMap.isEmpty() ? new URL(url.getProtocol(), url.getUsername(), url.getPassword(), url.getHost(), url.getPort(), url.getPath()) : new URL(url.getProtocol(), url.getUsername(), url.getPassword(), url.getHost(), url.getPort(), url.getPath(), newMap);
     }
 
     public static String encode(String value) {
@@ -465,12 +477,10 @@ class URL implements Serializable {
     }
 
     public String getAuthority() {
-        if (StringUtils.isEmpty(username)
-                && StringUtils.isEmpty(password)) {
+        if (StringUtils.isEmpty(username) && StringUtils.isEmpty(password)) {
             return null;
         }
-        return (username == null ? "" : username)
-                + ":" + (password == null ? "" : password);
+        return (username == null ? "" : username) + ":" + (password == null ? "" : password);
     }
 
     public String getHost() {
@@ -1136,8 +1146,7 @@ class URL implements Serializable {
     }
 
     public URL addParameter(String key, String value) {
-        if (StringUtils.isEmpty(key)
-                || StringUtils.isEmpty(value)) {
+        if (StringUtils.isEmpty(key) || StringUtils.isEmpty(value)) {
             return this;
         }
         // if value doesn't change, return immediately
@@ -1152,8 +1161,7 @@ class URL implements Serializable {
     }
 
     public URL addParameterIfAbsent(String key, String value) {
-        if (StringUtils.isEmpty(key)
-                || StringUtils.isEmpty(value)) {
+        if (StringUtils.isEmpty(key) || StringUtils.isEmpty(value)) {
             return this;
         }
         if (hasParameter(key)) {
@@ -1166,9 +1174,7 @@ class URL implements Serializable {
     }
 
     public URL addMethodParameter(String method, String key, String value) {
-        if (StringUtils.isEmpty(method)
-                || StringUtils.isEmpty(key)
-                || StringUtils.isEmpty(value)) {
+        if (StringUtils.isEmpty(method) || StringUtils.isEmpty(key) || StringUtils.isEmpty(value)) {
             return this;
         }
 
@@ -1181,9 +1187,7 @@ class URL implements Serializable {
     }
 
     public URL addMethodParameterIfAbsent(String method, String key, String value) {
-        if (StringUtils.isEmpty(method)
-                || StringUtils.isEmpty(key)
-                || StringUtils.isEmpty(value)) {
+        if (StringUtils.isEmpty(method) || StringUtils.isEmpty(key) || StringUtils.isEmpty(value)) {
             return this;
         }
         if (hasMethodParameter(method, key)) {
@@ -1387,8 +1391,7 @@ class URL implements Serializable {
             List<String> includes = (ArrayUtils.isEmpty(parameters) ? null : Arrays.asList(parameters));
             boolean first = true;
             for (Map.Entry<String, String> entry : new TreeMap<>(getParameters()).entrySet()) {
-                if (StringUtils.isNotEmpty(entry.getKey())
-                        && (includes == null || includes.contains(entry.getKey()))) {
+                if (StringUtils.isNotEmpty(entry.getKey()) && (includes == null || includes.contains(entry.getKey()))) {
                     if (first) {
                         if (concat) {
                             buf.append("?");
@@ -1405,6 +1408,15 @@ class URL implements Serializable {
         }
     }
 
+    /**
+     * 格式为
+     * protocol://username:password@host:port/path?key=value&key=value ，通过 URL#buildString(...) 方法生成。
+     *
+     * @param appendUser
+     * @param appendParameter
+     * @param parameters
+     * @return
+     */
     private String buildString(boolean appendUser, boolean appendParameter, String... parameters) {
         return buildString(appendUser, appendParameter, false, false, parameters);
     }
