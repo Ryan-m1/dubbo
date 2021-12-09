@@ -33,6 +33,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * 主要处理的与系统配置相关，比如Java系统配置，以及配置中心的配置
+ */
 public class Environment extends LifecycleAdapter implements FrameworkExt {
     private static final Logger logger = LoggerFactory.getLogger(Environment.class);
     public static final String NAME = "environment";
@@ -64,6 +67,7 @@ public class Environment extends LifecycleAdapter implements FrameworkExt {
 
     @Override
     public void initialize() throws IllegalStateException {
+        //只有Environment的initialize方法才有实现，Environment首先从ConfigManager获取默认的配置中心对象ConfigCenterConfig，如果存在ConfigCenterConfig对象，那么将ConfigCenterConfig的externalConfiguration和appExternalConfiguration两个属性值设置到Environment的名字一致的两个属性上。
         ConfigManager configManager = ApplicationModel.getConfigManager();
         Optional<Collection<ConfigCenterConfig>> defaultConfigs = configManager.getDefaultConfigCenter();
         defaultConfigs.ifPresent(configs -> {

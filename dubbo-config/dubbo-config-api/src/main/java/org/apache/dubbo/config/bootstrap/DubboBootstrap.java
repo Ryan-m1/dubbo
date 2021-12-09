@@ -513,20 +513,22 @@ public class DubboBootstrap {
      */
     public void initialize() {
         if (!initialized.compareAndSet(false, true)) {
+            //initialize方法只能初始化一次
             return;
         }
-
+        //初始化FrameworkExt实现类，这里会调用Environment的initialize方法
         ApplicationModel.initFrameworkExts();
-
+        //启动配置中心
         startConfigCenter();
-
+        //加载远程配置
         loadRemoteConfigs();
-
+        //检查全局配置
         checkGlobalConfigs();
 
         // @since 2.7.8
+        //启动MetadataCenter
         startMetadataCenter();
-
+        //初始化MetadataService
         initMetadataService();
 
         if (logger.isInfoEnabled()) {
@@ -534,11 +536,14 @@ public class DubboBootstrap {
         }
     }
 
+    /**
+     * 检查各个配置对象的各个属性设置的值是否合法，检查内容包括是否有非法字符，长度是否超长
+     */
     private void checkGlobalConfigs() {
-        // check Application
+        // check ApplicationConfig
         ConfigValidationUtils.validateApplicationConfig(getApplication());
 
-        // check Metadata
+        // check MetadataReportConfig
         Collection<MetadataReportConfig> metadatas = configManager.getMetadataConfigs();
         if (CollectionUtils.isEmpty(metadatas)) {
             MetadataReportConfig metadataReportConfig = new MetadataReportConfig();
@@ -555,7 +560,7 @@ public class DubboBootstrap {
             }
         }
 
-        // check Provider
+        // check ProviderConfig
         Collection<ProviderConfig> providers = configManager.getProviders();
         if (CollectionUtils.isEmpty(providers)) {
             configManager.getDefaultProvider().orElseGet(() -> {
@@ -568,7 +573,7 @@ public class DubboBootstrap {
         for (ProviderConfig providerConfig : configManager.getProviders()) {
             ConfigValidationUtils.validateProviderConfig(providerConfig);
         }
-        // check Consumer
+        // check ConsumerConfig
         Collection<ConsumerConfig> consumers = configManager.getConsumers();
         if (CollectionUtils.isEmpty(consumers)) {
             configManager.getDefaultConsumer().orElseGet(() -> {
@@ -582,18 +587,25 @@ public class DubboBootstrap {
             ConfigValidationUtils.validateConsumerConfig(consumerConfig);
         }
 
-        // check Monitor
+        // check MonitorConfig
         ConfigValidationUtils.validateMonitorConfig(getMonitor());
-        // check Metrics
+        // check MetricsConfig
         ConfigValidationUtils.validateMetricsConfig(getMetrics());
-        // check Module
+        // check ModuleConfig
         ConfigValidationUtils.validateModuleConfig(getModule());
-        // check Ssl
+        // check SslConfig
         ConfigValidationUtils.validateSslConfig(getSsl());
     }
 
-    private void startConfigCenter() {
 
+    /**
+     * 该方法从ConfigManager中获得的所有的ConfigCenterConfig对象。
+     * 然后访问配置中心的配置，将这些配置保存到Environment对象，
+     * 最后使用这些配置更新ApplicationConfig，MonitorConfig，ModuleConfig等对象的属性。
+     * 配置中心可以有多个，在获取配置的时候，顺次访问每个配置中心，配置保存到本地时后访问的配置中心配置会覆盖之前的配置数据。
+     */
+    private void startConfigCenter() {
+        //用注册中心作为配置中心
         useRegistryAsConfigCenterIfNecessary();
 
         Collection<ConfigCenterConfig> configCenters = configManager.getConfigCenters();
@@ -649,9 +661,10 @@ public class DubboBootstrap {
     }
 
     /**
-     * For compatibility purpose, use registry as the default config center when
-     * there's no config center specified explicitly and
-     * useAsConfigCenter of registryConfig is null or true
+     * 如果在方法startConfigCenter中，从ConfigManager里面没有找到ConfigCenterConfig对象，
+     * 那么在本方法里面，会判断注册中心配置对象RegistryConfig的useAsConfigCenter值：
+     * )1 如果useAsConfigCenter=null或者true，那么就将注册中心作为配置中心，接下来创建对象ConfigCenterConfig，并将RegistryConfig中的地址、协议、用户名等信息设置到ConfigCenterConfig中，然后将ConfigCenterConfig对象添加到ConfigManager，最后再执行一次startConfigCenter。
+     * )2 对于其他的useAsConfigCenter值，dubbo跳过该注册中心RegistryConfig。useAsConfigCenter默认为null。dubbo可以配置多个注册中心和配置中心。
      */
     private void useRegistryAsConfigCenterIfNecessary() {
         // we use the loading status of DynamicConfiguration to decide whether ConfigCenter has been initiated.
@@ -828,11 +841,19 @@ public class DubboBootstrap {
         return metadataAddressBuilder.toString();
     }
 
+    /**
+     * 加载远程配置
+     * 创建RegistryConfig和ProtocolConfig对象，并设置其属性。
+     * 该方法首先从Environment对象的appExternalConfigurationMap和externalConfigurationMap字段中获取所有的ProtocolConfig和RegistryConfig的id值，
+     * 根据id值创建对应的RegistryConfig和ProtocolConfig对象。之后使用Environment对象设置RegistryConfig和ProtocolConfig对象的各个属性
+     */
     private void loadRemoteConfigs() {
         // registry ids to registry configs
         List<RegistryConfig> tmpRegistries = new ArrayList<>();
+        //从Environment对象的appExternalConfigurationMap和externalConfigurationMap字段中获取所有的RegistryConfig的id值
         Set<String> registryIds = configManager.getRegistryIds();
         registryIds.forEach(id -> {
+            //根据id值创建对应的RegistryConfig和ProtocolConfig对象。之后使用Environment对象设置RegistryConfig对象的各个属性
             if (tmpRegistries.stream().noneMatch(reg -> reg.getId().equals(id))) {
                 tmpRegistries.add(configManager.getRegistry(id).orElseGet(() -> {
                     RegistryConfig registryConfig = new RegistryConfig();
@@ -847,8 +868,10 @@ public class DubboBootstrap {
 
         // protocol ids to protocol configs
         List<ProtocolConfig> tmpProtocols = new ArrayList<>();
+        //从Environment对象的appExternalConfigurationMap和externalConfigurationMap字段中获取所有的ProtocolConfig的id值
         Set<String> protocolIds = configManager.getProtocolIds();
         protocolIds.forEach(id -> {
+            //根据id值创建对应的RegistryConfig和ProtocolConfig对象。之后使用Environment对象设置ProtocolConfig对象的各个属性
             if (tmpProtocols.stream().noneMatch(prot -> prot.getId().equals(id))) {
                 tmpProtocols.add(configManager.getProtocol(id).orElseGet(() -> {
                     ProtocolConfig protocolConfig = new ProtocolConfig();
@@ -875,24 +898,29 @@ public class DubboBootstrap {
      * Start the bootstrap
      */
     public DubboBootstrap start() {
+        //只能初始化一次
         if (started.compareAndSet(false, true)) {
             destroyed.set(false);
             ready.set(false);
+            //调用初始化方法
             initialize();
             if (logger.isInfoEnabled()) {
                 logger.info(NAME + " is starting...");
             }
             // 1. export Dubbo Services
+            // 暴露服务
             exportServices();
 
             // Not only provider register
             if (!isOnlyRegisterProvider() || hasExportedServices()) {
-                // 2. export MetadataService
+                // 2. export MetadataServic
+                // 暴露MetadataServicee
                 exportMetadataService();
                 //3. Register the local ServiceInstance if required
+                // 注册服务实例
                 registerServiceInstance();
             }
-
+            //引用
             referServices();
             if (asyncExportingFutures.size() > 0) {
                 new Thread(() -> {
@@ -1404,7 +1432,8 @@ public class DubboBootstrap {
 
     /**
      * Try reset dubbo status for new instance.
-     * @deprecated  For testing purposes only
+     *
+     * @deprecated For testing purposes only
      */
     @Deprecated
     public static void reset() {
@@ -1413,6 +1442,7 @@ public class DubboBootstrap {
 
     /**
      * Try reset dubbo status for new instance.
+     *
      * @deprecated For testing purposes only
      */
     @Deprecated
