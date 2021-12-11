@@ -1,5 +1,9 @@
 搭建Dubbo源码阅读环境
 
+[高级指南](https://dubbo.apache.org/zh/docsv2.7/dev/design/)
+
+[用户文档](https://dubbo.apache.org/zh/docsv2.7/user/preface/architecture/)
+
 # Apache Dubbo Project
 
 [![Build Status](https://github.com/apache/dubbo/workflows/Build%20and%20Test/badge.svg?branch=master)](https://github.com/apache/dubbo/actions/workflows/build-and-test.yml?query=branch%3Amaster+)
@@ -13,9 +17,12 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/ApacheDubbo.svg?label=Follow&style=social&logoWidth=0)](https://twitter.com/intent/follow?screen_name=ApacheDubbo)
 [![Gitter](https://badges.gitter.im/alibaba/dubbo.svg)](https://gitter.im/alibaba/dubbo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Apache Dubbo is a high-performance, Java-based open-source RPC framework. Please visit the [official site](http://dubbo.apache.org) for the quick start guide and documentation, as well as the [wiki](https://github.com/apache/dubbo/wiki) for news, FAQ, and release notes.
+Apache Dubbo is a high-performance, Java-based open-source RPC framework. Please visit
+the [official site](http://dubbo.apache.org) for the quick start guide and documentation, as well as
+the [wiki](https://github.com/apache/dubbo/wiki) for news, FAQ, and release notes.
 
-We are now collecting Dubbo user info to help us to improve Dubbo further. Kindly support us by providing your usage information on [issue#1012: Wanted: who's using dubbo](https://github.com/apache/dubbo/issues/1012), thanks :)
+We are now collecting Dubbo user info to help us to improve Dubbo further. Kindly support us by providing your usage
+information on [issue#1012: Wanted: who's using dubbo](https://github.com/apache/dubbo/issues/1012), thanks :)
 
 ## Architecture
 
@@ -32,34 +39,39 @@ We are now collecting Dubbo user info to help us to improve Dubbo further. Kindl
 
 ## Getting started
 
-The following code snippet comes from [Dubbo Samples](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-api). You may clone the sample project and step into the `dubbo-samples-api` subdirectory before proceeding.
+The following code snippet comes
+from [Dubbo Samples](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-api). You may clone the sample
+project and step into the `dubbo-samples-api` subdirectory before proceeding.
 
 ```bash
 # git clone https://github.com/apache/dubbo-samples.git
 # cd dubbo-samples/dubbo-samples-api
 ```
 
-There's a [README](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-api/README.md) file under `dubbo-samples-api` directory. We recommend referencing the samples in that directory by following the below-mentioned instructions: 
+There's a [README](https://github.com/apache/dubbo-samples/tree/master/dubbo-samples-api/README.md) file
+under `dubbo-samples-api` directory. We recommend referencing the samples in that directory by following the
+below-mentioned instructions:
 
 ### Maven dependency
 
 ```xml
+
 <properties>
     <dubbo.version>2.7.10</dubbo.version>
 </properties>
 
 <dependencies>
-    <dependency>
-        <groupId>org.apache.dubbo</groupId>
-        <artifactId>dubbo</artifactId>
-        <version>${dubbo.version}</version>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.dubbo</groupId>
-        <artifactId>dubbo-dependencies-zookeeper</artifactId>
-        <version>${dubbo.version}</version>
-        <type>pom</type>
-    </dependency>
+<dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo</artifactId>
+    <version>${dubbo.version}</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-dependencies-zookeeper</artifactId>
+    <version>${dubbo.version}</version>
+    <type>pom</type>
+</dependency>
 </dependencies>
 ```
 
@@ -73,7 +85,9 @@ public interface GreetingsService {
 }
 ```
 
-*See [api/GreetingsService.java](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/api/GreetingsService.java) on GitHub.*
+*
+See [api/GreetingsService.java](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/api/GreetingsService.java)
+on GitHub.*
 
 ### Implement service interface for the provider
 
@@ -90,7 +104,9 @@ public class GreetingsServiceImpl implements GreetingsService {
 }
 ```
 
-*See [provider/GreetingsServiceImpl.java](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/provider/GreetingsServiceImpl.java) on GitHub.*
+*
+See [provider/GreetingsServiceImpl.java](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/provider/GreetingsServiceImpl.java)
+on GitHub.*
 
 ### Start service provider
 
@@ -122,7 +138,9 @@ public class Application {
 }
 ```
 
-*See [provider/Application.java](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/provider/Application.java) on GitHub.*
+*
+See [provider/Application.java](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/provider/Application.java)
+on GitHub.*
 
 ### Build and run the provider
 
@@ -156,7 +174,10 @@ public class Application {
     }
 }
 ```
-*See [consumer/Application.java](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/client/Application.java) on GitHub.*
+
+*
+See [consumer/Application.java](https://github.com/apache/dubbo-samples/blob/master/dubbo-samples-api/src/main/java/org/apache/dubbo/samples/client/Application.java)
+on GitHub.*
 
 ### Build and run the consumer
 
@@ -167,17 +188,20 @@ public class Application {
 
 The consumer will print out `hi, dubbo` on the screen.
 
-
 ### Next steps
 
-* [Your first Dubbo application](https://dubbo.apache.org/blog/2018/08/07/dubbo-101/) - A 101 tutorial to reveal more details, with the same code above.
-* [Dubbo user manual](https://dubbo.apache.org/docs/v2.7/user/preface/background/) - How to use Dubbo and all its features.
+* [Your first Dubbo application](https://dubbo.apache.org/blog/2018/08/07/dubbo-101/) - A 101 tutorial to reveal more
+  details, with the same code above.
+* [Dubbo user manual](https://dubbo.apache.org/docs/v2.7/user/preface/background/) - How to use Dubbo and all its
+  features.
 * [Dubbo developer guide](https://dubbo.apache.org/docs/v2.7/dev/build/) - How to involve in Dubbo development.
-* [Dubbo admin manual](https://dubbo.apache.org/docs/v2.7/admin/install/provider-demo/) - How to admin and manage Dubbo services.
+* [Dubbo admin manual](https://dubbo.apache.org/docs/v2.7/admin/install/provider-demo/) - How to admin and manage Dubbo
+  services.
 
 ## Building
 
-If you want to try out the cutting-edge features, you can build with the following commands. (Java 1.8 is needed to build the master branch)
+If you want to try out the cutting-edge features, you can build with the following commands. (Java 1.8 is needed to
+build the master branch)
 
 ```
   mvn clean install
@@ -186,7 +210,10 @@ If you want to try out the cutting-edge features, you can build with the followi
 ## Contact
 
 * Mailing list:
-  * dev list: for dev/user discussion. [subscribe](mailto:dev-subscribe@dubbo.apache.org), [unsubscribe](mailto:dev-unsubscribe@dubbo.apache.org), [archive](https://lists.apache.org/list.html?dev@dubbo.apache.org),  [guide](https://github.com/apache/dubbo/wiki/Mailing-list-subscription-guide)
+    * dev list: for dev/user discussion. [subscribe](mailto:dev-subscribe@dubbo.apache.org)
+      , [unsubscribe](mailto:dev-unsubscribe@dubbo.apache.org)
+      , [archive](https://lists.apache.org/list.html?dev@dubbo.apache.org)
+      ,  [guide](https://github.com/apache/dubbo/wiki/Mailing-list-subscription-guide)
 
 * Bugs: [Issues](https://github.com/apache/dubbo/issues/new?template=dubbo-issue-report-template.md)
 * Gitter: [Gitter channel](https://gitter.im/alibaba/dubbo)
@@ -194,19 +221,23 @@ If you want to try out the cutting-edge features, you can build with the followi
 
 ## Contributing
 
-See [CONTRIBUTING](https://github.com/apache/dubbo/blob/master/CONTRIBUTING.md) for details on submitting patches and the contribution workflow.
+See [CONTRIBUTING](https://github.com/apache/dubbo/blob/master/CONTRIBUTING.md) for details on submitting patches and
+the contribution workflow.
 
 ### How can I contribute?
 
-* Take a look at issues with tags marked [`Good first issue`](https://github.com/apache/dubbo/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) or [`Help wanted`](https://github.com/apache/dubbo/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
-* Join the discussion on the mailing list, subscription [guide](https://github.com/apache/dubbo/wiki/Mailing-list-subscription-guide).
+* Take a look at issues with tags
+  marked [`Good first issue`](https://github.com/apache/dubbo/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
+  or [`Help wanted`](https://github.com/apache/dubbo/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
+* Join the discussion on the mailing list,
+  subscription [guide](https://github.com/apache/dubbo/wiki/Mailing-list-subscription-guide).
 * Answer questions on [issues](https://github.com/apache/dubbo/issues).
 * Fix bugs reported on [issues](https://github.com/apache/dubbo/issues), and send us a pull request.
 * Review the existing [pull request](https://github.com/apache/dubbo/pulls).
 * Improve the [website](https://github.com/apache/dubbo-website), typically we need
-  * blog post
-  * translation on documentation
-  * use cases around the integration of Dubbo in enterprise systems.
+    * blog post
+    * translation on documentation
+    * use cases around the integration of Dubbo in enterprise systems.
 * Improve the [dubbo-admin/dubbo-monitor](https://github.com/apache/dubbo-admin).
 * Contribute to the projects listed in [ecosystem](https://github.com/dubbo).
 * Other forms of contribution not explicitly enumerated above.
@@ -214,7 +245,8 @@ See [CONTRIBUTING](https://github.com/apache/dubbo/blob/master/CONTRIBUTING.md)
 
 ## Reporting bugs
 
-Please follow the [template](https://github.com/apache/dubbo/issues/new?template=dubbo-issue-report-template.md) for reporting any issues.
+Please follow the [template](https://github.com/apache/dubbo/issues/new?template=dubbo-issue-report-template.md) for
+reporting any issues.
 
 ## Reporting a security vulnerability
 
@@ -222,7 +254,8 @@ Please report security vulnerabilities to [us](mailto:security@dubbo.apache.org)
 
 ## Dubbo ecosystem
 
-* [Dubbo Ecosystem Entry](https://github.com/apache?utf8=%E2%9C%93&q=dubbo&type=&language=) - A GitHub group `dubbo` to gather all Dubbo relevant projects not appropriate in [apache](https://github.com/apache) group yet
+* [Dubbo Ecosystem Entry](https://github.com/apache?utf8=%E2%9C%93&q=dubbo&type=&language=) - A GitHub group `dubbo` to
+  gather all Dubbo relevant projects not appropriate in [apache](https://github.com/apache) group yet
 * [Dubbo Website](https://github.com/apache/dubbo-website) - Apache Dubbo official website
 * [Dubbo Samples](https://github.com/apache/dubbo-samples) - samples for Apache Dubbo
 * [Dubbo Spring Boot](https://github.com/apache/dubbo-spring-boot-project) - Spring Boot Project for Dubbo
@@ -239,4 +272,5 @@ Please report security vulnerabilities to [us](mailto:security@dubbo.apache.org)
 
 ## License
 
-Apache Dubbo software is licenced under the Apache License Version 2.0. See the [LICENSE](https://github.com/apache/dubbo/blob/master/LICENSE) file for details.
+Apache Dubbo software is licenced under the Apache License Version 2.0. See
+the [LICENSE](https://github.com/apache/dubbo/blob/master/LICENSE) file for details.

@@ -212,12 +212,14 @@ public class RegistryProtocol implements Protocol {
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker, providerUrl);
 
         // url to registry
+        //根据URL格式获取指定注册中心
         final Registry registry = getRegistry(originInvoker);
         final URL registeredProviderUrl = getUrlToRegistry(providerUrl, registryUrl);
 
         // decide if we need to delay publish
         boolean register = providerUrl.getParameter(REGISTER_KEY, true);
         if (register) {
+            //注册到注册中心
             registry.register(registeredProviderUrl);
         }
 
@@ -229,6 +231,7 @@ public class RegistryProtocol implements Protocol {
         exporter.setSubscribeUrl(overrideSubscribeUrl);
 
         // Deprecated! Subscribe to override rules in 2.6.x or before.
+        //订阅
         registry.subscribe(overrideSubscribeUrl, overrideSubscribeListener);
 
         notifyExport(exporter);
@@ -578,7 +581,7 @@ public class RegistryProtocol implements Protocol {
             return;
         }
         ExtensionLoader.getExtensionLoader(GovernanceRuleRepository.class).getDefaultExtension()
-            .removeListener(application + CONFIGURATORS_SUFFIX, providerConfigurationListener);
+                .removeListener(application + CONFIGURATORS_SUFFIX, providerConfigurationListener);
     }
 
     @Override
@@ -701,7 +704,7 @@ public class RegistryProtocol implements Protocol {
             newUrl = getConfiguredInvokerUrl(serviceConfigurationListeners.get(originUrl.getServiceKey())
                     .getConfigurators(), newUrl);
             if (!newUrl.equals(currentUrl)) {
-                if(newUrl.getParameter(Constants.NEED_REEXPORT, true)) {
+                if (newUrl.getParameter(Constants.NEED_REEXPORT, true)) {
                     RegistryProtocol.this.reExport(originInvoker, newUrl);
                 }
                 LOGGER.info("exported provider url changed, origin url: " + originUrl +
@@ -807,7 +810,7 @@ public class RegistryProtocol implements Protocol {
 
         @Override
         public void unexport() {
-            if (!unexported.compareAndSet(false,true)) {
+            if (!unexported.compareAndSet(false, true)) {
                 return;
             }
 
