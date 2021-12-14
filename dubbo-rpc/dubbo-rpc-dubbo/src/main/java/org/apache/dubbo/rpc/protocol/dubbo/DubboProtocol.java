@@ -91,6 +91,11 @@ import static org.apache.dubbo.rpc.protocol.dubbo.Constants.SHARE_CONNECTIONS_KE
 /**
  * dubbo protocol support.
  */
+
+/**
+ * Dubbo 协议的 Invoker 转为 Exporter 发生在 DubboProtocol 类的 export 方法，
+ * 它主要是打开 socket 侦听服务，并接收客户端发来的各种请求，通讯细节由 Dubbo 自己实现
+ */
 public class DubboProtocol extends AbstractProtocol {
 
     public static final String NAME = "dubbo";

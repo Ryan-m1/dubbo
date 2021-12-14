@@ -40,7 +40,12 @@ import static org.apache.dubbo.rpc.Constants.GENERIC_KEY;
 /**
  * RmiProtocol.
  */
-public class RmiProtocol extends AbstractProxyProtocol{
+
+/**
+ * RMI 协议的 Invoker 转为 Exporter 发生在 RmiProtocol 类的 export 方法，
+ * 它通过 Spring 或 Dubbo 或 JDK 来实现 RMI 服务，通讯细节这一块由 JDK 底层来实现，这就省了不少工作量。
+ */
+public class RmiProtocol extends AbstractProxyProtocol {
 
     public static final int DEFAULT_PORT = 1099;
 

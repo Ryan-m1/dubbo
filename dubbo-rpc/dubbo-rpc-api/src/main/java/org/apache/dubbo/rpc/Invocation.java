@@ -28,6 +28,10 @@ import java.util.stream.Stream;
  * @see org.apache.dubbo.rpc.Invoker#invoke(Invocation)
  * @see org.apache.dubbo.rpc.RpcInvocation
  */
+
+/**
+ * Invocation是会话域，它持有调用过程中的变量，比如方法名，参数等
+ */
 public interface Invocation {
 
     String getTargetServiceUniqueName();
@@ -45,15 +49,15 @@ public interface Invocation {
 
     /**
      * get the interface name
+     *
      * @return
      */
     String getServiceName();
 
     /**
-     * get parameter types.
+     * 获得方法参数类型数组
      *
-     * @return parameter types.
-     * @serial
+     * @return
      */
     Class<?>[] getParameterTypes();
 

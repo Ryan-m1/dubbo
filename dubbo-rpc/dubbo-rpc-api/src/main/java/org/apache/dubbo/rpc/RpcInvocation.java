@@ -54,13 +54,22 @@ public class RpcInvocation implements Invocation, Serializable {
     private String targetServiceUniqueName;
     private String protocolServiceKey;
 
+    /**
+     * 方法名
+     */
     private String methodName;
     private String serviceName;
 
+    /**
+     * 方法参数类型数组 {@link Method#getParameterTypes()}
+     */
     private transient Class<?>[] parameterTypes;
     private String parameterTypesDesc;
     private String[] compatibleParamSignatures;
 
+    /**
+     * 方法参数数组
+     */
     private Object[] arguments;
 
     /**
@@ -292,7 +301,7 @@ public class RpcInvocation implements Invocation, Serializable {
 
     @Override
     public void setAttachment(String key, Object value) {
-       setObjectAttachment(key, value);
+        setObjectAttachment(key, value);
     }
 
     @Override
