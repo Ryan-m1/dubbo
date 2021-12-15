@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * The annotated class will only work as a wrapper when the condition matches.
  */
+//Wrapper 类同样实现了扩展点接口，但是 Wrapper 不是扩展点的真正实现。它的用途主要是用于从 ExtensionLoader 返回扩展点时，包装在真正的扩展点实现外。即从 ExtensionLoader 中返回的实际上是 Wrapper 类的实例，Wrapper 持有了实际的扩展点实现类。
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Wrapper {
 

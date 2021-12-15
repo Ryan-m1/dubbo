@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * OrderComparator
+ * 自动激活拓展对象排序器
  */
 public class ActivateComparator implements Comparator<Class> {
 
