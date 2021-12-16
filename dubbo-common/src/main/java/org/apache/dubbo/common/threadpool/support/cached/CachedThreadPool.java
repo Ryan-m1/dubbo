@@ -40,6 +40,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.THREAD_NAME_KEY;
 /**
  * This thread pool is self-tuned. Thread will be recycled after idle for one minute, and new thread will be created for
  * the upcoming request.
+ * <p>
+ * 实现 ThreadPool 接口，缓存线程池，空闲一定时长，自动删除，需要时重建。
  *
  * @see java.util.concurrent.Executors#newCachedThreadPool()
  */
@@ -49,11 +51,18 @@ public class CachedThreadPool implements ThreadPool {
 
     @Override
     public Executor getExecutor(URL url) {
+        //配置方式和 FixedThreadPool 类似，使用 <dubbo:parameter /> 配置。
+        // 线程池名
         String name = url.getParameter(THREAD_NAME_KEY, DEFAULT_THREAD_NAME);
+        // 核心线程数
         int cores = url.getParameter(CORE_THREADS_KEY, DEFAULT_CORE_THREADS);
+        // 最大线程数
         int threads = url.getParameter(THREADS_KEY, Integer.MAX_VALUE);
+        // 队列数
         int queues = url.getParameter(QUEUES_KEY, DEFAULT_QUEUES);
+        // 线程存活时长
         int alive = url.getParameter(ALIVE_KEY, DEFAULT_ALIVE);
+        // 创建执行器
         return new ThreadPoolExecutor(cores, threads, alive, TimeUnit.MILLISECONDS,
                 queues == 0 ? new SynchronousQueue<Runnable>() :
                         (queues < 0 ? new LinkedBlockingQueue<Runnable>()

@@ -21,18 +21,9 @@ import org.apache.dubbo.common.threadlocal.NamedInternalThreadFactory;
 import org.apache.dubbo.common.threadpool.ThreadPool;
 import org.apache.dubbo.common.threadpool.support.AbortPolicyWithReport;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
-import static org.apache.dubbo.common.constants.CommonConstants.DEFAULT_QUEUES;
-import static org.apache.dubbo.common.constants.CommonConstants.DEFAULT_THREADS;
-import static org.apache.dubbo.common.constants.CommonConstants.DEFAULT_THREAD_NAME;
-import static org.apache.dubbo.common.constants.CommonConstants.QUEUES_KEY;
-import static org.apache.dubbo.common.constants.CommonConstants.THREADS_KEY;
-import static org.apache.dubbo.common.constants.CommonConstants.THREAD_NAME_KEY;
+import static org.apache.dubbo.common.constants.CommonConstants.*;
 
 /**
  * Creates a thread pool that reuses a fixed number of threads
@@ -43,15 +34,36 @@ public class FixedThreadPool implements ThreadPool {
 
     public static final String NAME = "fixed";
 
+    /**
+     * 例如
+     * <dubbo:service interface="com.alibaba.dubbo.demo.DemoService" ref="demoService">
+     * * *<dubbo:parameter key="threadname" value="shuaiqi" />
+     * * *<dubbo:parameter key="threads" value="123" />
+     * * *<dubbo:parameter key="queues" value="10" />
+     * </dubbo:service>
+     *
+     * @param url URL contains thread parameter
+     * @return
+     */
     @Override
     public Executor getExecutor(URL url) {
+        // 线程名
         String name = url.getParameter(THREAD_NAME_KEY, DEFAULT_THREAD_NAME);
+        // 线程数
         int threads = url.getParameter(THREADS_KEY, DEFAULT_THREADS);
+        // 队列数
         int queues = url.getParameter(QUEUES_KEY, DEFAULT_QUEUES);
+        // 创建执行器
+        //根据不同的队列数，使用不同的队列实现：
+        //queues == 0 ， SynchronousQueue 对象。
+        //queues < 0 ， LinkedBlockingQueue 对象。
+        //queues > 0 ，带队列数的 LinkedBlockingQueue 对象。
         return new ThreadPoolExecutor(threads, threads, 0, TimeUnit.MILLISECONDS,
                 queues == 0 ? new SynchronousQueue<Runnable>() :
                         (queues < 0 ? new LinkedBlockingQueue<Runnable>()
                                 : new LinkedBlockingQueue<Runnable>(queues)),
+                //创建 NamedThreadFactory 对象，用于生成线程名
+                //AbortPolicyWithReport对象 用于当任务添加到线程池中被拒绝时
                 new NamedInternalThreadFactory(name, true), new AbortPolicyWithReport(name, url));
     }
 

@@ -27,12 +27,17 @@ import static org.apache.dubbo.common.constants.CommonConstants.THREADPOOL_KEY;
 
 /**
  * ThreadPool
+ * 线程池接口
  */
 @SPI(FixedThreadPool.NAME)
 public interface ThreadPool {
 
     /**
      * Thread pool
+     * <p>
+     * 获得对应的线程池的执行器
+     * <p>
+     * Adaptive注解作用：基于 Dubbo SPI Adaptive 机制，加载对应的线程池实现
      *
      * @param url URL contains thread parameter
      * @return thread pool
