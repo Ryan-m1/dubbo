@@ -116,11 +116,13 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     private String serviceName;
 
+    /**
+     * 自适应 Protocol 实现对象
+     */
     private static final Protocol PROTOCOL = ExtensionLoader.getExtensionLoader(Protocol.class).getAdaptiveExtension();
 
     /**
-     * A {@link ProxyFactory} implementation that will generate a exported service proxy,the JavassistProxyFactory is its
-     * default implementation
+     * 自适应 ProxyFactory 实现对象
      */
     private static final ProxyFactory PROXY_FACTORY = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();
 
@@ -137,7 +139,14 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
     private DubboBootstrap bootstrap;
 
     /**
-     * The exported services
+     * 服务配置暴露的 Exporter 。
+     * URL ：Exporter 不一定是 1：1 的关系。
+     * 例如
+     * {@link #scope} 未设置时，会暴露 Local + Remote 两个，也就是 URL ：Exporter = 1：2
+     * {@link #scope} 设置为空时，不会暴露，也就是 URL ：Exporter = 1：0
+     * {@link #scope} 设置为 Local 或 Remote 任一时，会暴露 Local 或 Remote 一个，也就是 URL ：Exporter = 1：1
+     * <p>
+     * 非配置。
      */
     private final List<Exporter<?>> exporters = new ArrayList<Exporter<?>>();
 
@@ -321,18 +330,27 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         ServiceRepository repository = ApplicationModel.getServiceRepository();
         ServiceDescriptor serviceDescriptor = repository.registerService(getInterfaceClass());
         repository.registerProvider(getUniqueServiceName(), ref, serviceDescriptor, this, serviceMetadata);
-
+        // 加载注册中心 URL 数组
         List<URL> registryURLs = ConfigValidationUtils.loadRegistries(this, true);
 
         int protocolConfigNum = protocols.size();
+        // 循环 `protocols` ，向逐个注册中心分组暴露服务。
         for (ProtocolConfig protocolConfig : protocols) {
             String pathKey = URL.buildKey(getContextPath(protocolConfig).map(p -> p + "/" + path).orElse(path), group, version);
             // In case user specified path, register service one more time to map it to path.
             repository.registerService(pathKey, interfaceClass);
+            //使用对应的协议，逐个向注册中心分组暴露服务。
             doExportUrlsFor1Protocol(protocolConfig, registryURLs, protocolConfigNum);
         }
     }
 
+    /**
+     * 使用对应的协议，逐个向注册中心分组暴露服务。在这个方法中，包含了本地和远程两种暴露方式。在下文中，我们会看到，本地暴露不会向注册中心注册服务，因为仅仅用于 JVM 内部本地调用，内存中已经有相关信息。
+     *
+     * @param protocolConfig
+     * @param registryURLs
+     * @param protocolConfigNum
+     */
     private void doExportUrlsFor1Protocol(ProtocolConfig protocolConfig, List<URL> registryURLs, int protocolConfigNum) {
         String name = protocolConfig.getName();
         if (StringUtils.isEmpty(name)) {
@@ -457,14 +475,15 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         }
 
         String scope = url.getParameter(SCOPE_KEY);
-        // don't export when none is configured
+        // 当非 "remote" 时，调用 #exportLocal(url) 方法，本地暴露服务
         if (!SCOPE_NONE.equalsIgnoreCase(scope)) {
 
             // export to local if the config is not remote (export to remote only when config is remote)
             if (!SCOPE_REMOTE.equalsIgnoreCase(scope)) {
+                //本地暴露服务
                 exportLocal(url);
             }
-            // export to remote if the config is not local (export to local only when config is local)
+            //非 "local" 时，远程暴露服务
             if (!SCOPE_LOCAL.equalsIgnoreCase(scope)) {
                 if (CollectionUtils.isNotEmpty(registryURLs)) {
                     for (URL registryURL : registryURLs) {
@@ -520,12 +539,19 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         this.urls.add(url);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     /**
-     * always export injvm
-     */ private void exportLocal(URL url) {
+     * 本地暴露服务
+     *
+     * @param url 注册中心 URL
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void exportLocal(URL url) {
+        // 创建本地 Dubbo URL
         URL local = URLBuilder.from(url).setProtocol(LOCAL_PROTOCOL).setHost(LOCALHOST_VALUE).setPort(0).build();
+        // 使用 ProxyFactory 创建 Invoker 对象
+        // 使用 Protocol 暴露 Invoker 对象
         Exporter<?> exporter = PROTOCOL.export(PROXY_FACTORY.getInvoker(ref, (Class) interfaceClass, local));
+        // 添加到 `exporters`
         exporters.add(exporter);
         logger.info("Export dubbo service " + interfaceClass.getName() + " to local registry url : " + local);
     }
