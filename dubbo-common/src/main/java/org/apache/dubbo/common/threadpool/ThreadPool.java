@@ -28,6 +28,10 @@ import static org.apache.dubbo.common.constants.CommonConstants.THREADPOOL_KEY;
 /**
  * ThreadPool
  * 线程池接口
+ * <p>
+ * fixed 固定大小线程池，启动时建立线程，不关闭，一直持有。(缺省)
+ * cached 缓存线程池，空闲一分钟自动删除，需要时重建。
+ * limited 可伸缩线程池，但池中的线程数只会增长不会收缩。只增长不收缩的目的是为了避免收缩时突然来了大流量引起的性能问题。
  */
 @SPI(FixedThreadPool.NAME)
 public interface ThreadPool {

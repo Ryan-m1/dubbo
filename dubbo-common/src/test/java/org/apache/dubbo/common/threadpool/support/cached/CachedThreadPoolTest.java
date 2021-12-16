@@ -64,6 +64,7 @@ public class CachedThreadPoolTest {
             Thread thread = Thread.currentThread();
             assertThat(thread, instanceOf(InternalThread.class));
             assertThat(thread.getName(), startsWith("demo"));
+            System.out.println("this is a test case!");
             latch.countDown();
         });
 
