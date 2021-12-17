@@ -49,14 +49,32 @@ final class LazyConnectExchangeClient implements ExchangeClient {
     private static final Logger logger = LoggerFactory.getLogger(LazyConnectExchangeClient.class);
     protected final boolean requestWithWarning;
     private final URL url;
-    private final ExchangeHandler requestHandler;
-    private final Lock connectLock = new ReentrantLock();
-    private final int warningPeriod = 5000;
+
     /**
-     * lazy connect, initial state for connection
+     * 通道处理器
+     */
+    private final ExchangeHandler requestHandler;
+
+    /**
+     * 连接锁
+     */
+    private final Lock connectLock = new ReentrantLock();
+
+    private final int warningPeriod = 5000;
+
+    /**
+     * lazy connect 如果没有初始化时的连接状态
      */
     private final boolean initialState;
+
+    /**
+     * 通信客户端
+     */
     private volatile ExchangeClient client;
+
+    /**
+     * 警告计数器。每超过一定次数，打印告警日志
+     */
     private AtomicLong warningcount = new AtomicLong(0);
 
     public LazyConnectExchangeClient(URL url, ExchangeHandler requestHandler) {
@@ -68,19 +86,24 @@ final class LazyConnectExchangeClient implements ExchangeClient {
     }
 
     private void initClient() throws RemotingException {
+        // 已初始化，跳过
         if (client != null) {
             return;
         }
         if (logger.isInfoEnabled()) {
             logger.info("Lazy connect to " + url);
         }
+        // 获得锁
         connectLock.lock();
         try {
+            // 已初始化，跳过
             if (client != null) {
                 return;
             }
+            // 创建 Client ，连接服务器
             this.client = Exchangers.connect(url, requestHandler);
         } finally {
+            // 释放锁
             connectLock.unlock();
         }
     }
@@ -88,6 +111,7 @@ final class LazyConnectExchangeClient implements ExchangeClient {
     @Override
     public CompletableFuture<Object> request(Object request) throws RemotingException {
         warning();
+        //发送消息 / 请求前，都会调用该方法，保证客户端已经初始化。代码如下
         initClient();
         return client.request(request);
     }
@@ -109,6 +133,7 @@ final class LazyConnectExchangeClient implements ExchangeClient {
     @Override
     public CompletableFuture<Object> request(Object request, int timeout) throws RemotingException {
         warning();
+        //发送消息/请求前，都会调用该方法，保证客户端已经初始化
         initClient();
         return client.request(request, timeout);
     }
@@ -116,6 +141,7 @@ final class LazyConnectExchangeClient implements ExchangeClient {
     @Override
     public CompletableFuture<Object> request(Object request, ExecutorService executor) throws RemotingException {
         warning();
+        //发送消息/请求前，都会调用该方法，保证客户端已经初始化。代码如下
         initClient();
         return client.request(request, executor);
     }
@@ -123,6 +149,7 @@ final class LazyConnectExchangeClient implements ExchangeClient {
     @Override
     public CompletableFuture<Object> request(Object request, int timeout, ExecutorService executor) throws RemotingException {
         warning();
+        //发送消息/请求前，都会调用该方法，保证客户端已经初始化。代码如下
         initClient();
         return client.request(request, timeout, executor);
     }
@@ -170,12 +197,14 @@ final class LazyConnectExchangeClient implements ExchangeClient {
 
     @Override
     public void send(Object message) throws RemotingException {
+        //发送消息/请求前，都会调用该方法，保证客户端已经初始化。代码如下
         initClient();
         client.send(message);
     }
 
     @Override
     public void send(Object message, boolean sent) throws RemotingException {
+        //发送消息/请求前，都会调用该方法，保证客户端已经初始化。代码如下
         initClient();
         client.send(message, sent);
     }

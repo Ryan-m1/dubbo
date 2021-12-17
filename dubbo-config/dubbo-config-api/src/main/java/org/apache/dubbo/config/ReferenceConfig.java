@@ -310,6 +310,7 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
 
         serviceMetadata.getAttachments().putAll(map);
 
+        //创建 Service 代理对象
         ref = createProxy(map);
 
         serviceMetadata.setTarget(ref);
@@ -328,6 +329,7 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
 
     @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
     private T createProxy(Map<String, String> map) {
+        // 是否本地引用
         if (shouldJvmRefer(map)) {
             URL url = new URL(LOCAL_PROTOCOL, LOCALHOST_VALUE, 0, interfaceClass.getName()).addParameters(map);
             //通过 Protocol 将 Service接口 创建出 Invoker
@@ -337,32 +339,47 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
             }
         } else {
             urls.clear();
+            // 定义直连地址，可以是服务提供者的地址，也可以是注册中心的地址
             if (url != null && url.length() > 0) { // user specified URL, could be peer-to-peer address, or register center's address.
+                // 拆分地址成数组，使用 ";" 分隔。
                 String[] us = SEMICOLON_SPLIT_PATTERN.split(url);
+                // 循环数组，添加到 `url` 中。
                 if (us != null && us.length > 0) {
                     for (String u : us) {
+                        // 创建 URL 对象
                         URL url = URL.valueOf(u);
                         if (StringUtils.isEmpty(url.getPath())) {
+                            // 设置默认路径
                             url = url.setPath(interfaceName);
                         }
                         if (UrlUtils.isRegistry(url)) {
+                            // 注册中心的地址，带上服务引用的配置参数
                             urls.add(url.addParameterAndEncoded(REFER_KEY, StringUtils.toQueryString(map)));
-                        } else {
+                        }
+                        // 服务提供者的地址
+                        else {
                             urls.add(ClusterUtils.mergeUrl(url, map));
                         }
                     }
                 }
-            } else { // assemble URL from register center's configuration
+            }
+            // 注册中心
+            else { // assemble URL from register center's configuration
                 // if protocols not injvm checkRegistry
+                // 加载注册中心 URL 数组
                 if (!LOCAL_PROTOCOL.equalsIgnoreCase(getProtocol())) {
                     checkRegistry();
                     List<URL> us = ConfigValidationUtils.loadRegistries(this, false);
+                    // 循环数组，添加到 `url` 中。
                     if (CollectionUtils.isNotEmpty(us)) {
                         for (URL u : us) {
+                            // 加载监控中心 URL
                             URL monitorUrl = ConfigValidationUtils.loadMonitor(this, u);
+                            // 服务引用配置对象 `map`，带上监控中心的 URL
                             if (monitorUrl != null) {
                                 map.put(MONITOR_KEY, URL.encode(monitorUrl.toFullString()));
                             }
+                            // 注册中心的地址，带上服务引用的配置参数
                             urls.add(u.addParameterAndEncoded(REFER_KEY, StringUtils.toQueryString(map)));
                         }
                     }
@@ -375,29 +392,36 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
                 }
             }
 
+            // 单 `urls` 时，引用服务，返回 Invoker 对象
             if (urls.size() == 1) {
                 //通过 Protocol 将 Service接口 创建出 Invoker
                 invoker = REF_PROTOCOL.refer(interfaceClass, urls.get(0));
             } else {
+                // 循环 `urls` ，引用服务，返回 Invoker 对象
                 List<Invoker<?>> invokers = new ArrayList<Invoker<?>>();
                 URL registryURL = null;
                 for (URL url : urls) {
                     // For multi-registry scenarios, it is not checked whether each referInvoker is available.
                     // Because this invoker may become available later.
-                    //通过 Protocol 将 Service接口 创建出 Invoker
+                    // 引用服务  通过 Protocol 将 Service接口 创建出 Invoker
                     invokers.add(REF_PROTOCOL.refer(interfaceClass, url));
 
+                    // 使用最后一个注册中心的 URL
                     if (UrlUtils.isRegistry(url)) {
                         registryURL = url; // use last registry url
                     }
                 }
 
+                // 有注册中心
                 if (registryURL != null) { // registry url is available
                     // for multi-subscription scenario, use 'zone-aware' policy by default
+                    // 对有注册中心的 Cluster 只用 AvailableCluster
                     String cluster = registryURL.getParameter(CLUSTER_KEY, ZoneAwareCluster.NAME);
                     // The invoker wrap sequence would be: ZoneAwareClusterInvoker(StaticDirectory) -> FailoverClusterInvoker(RegistryDirectory, routing happens here) -> Invoker
                     invoker = Cluster.getCluster(cluster, false).join(new StaticDirectory(registryURL, invokers));
-                } else { // not a registry url, must be direct invoke.
+                }
+                // 无注册中心
+                else { // not a registry url, must be direct invoke.
                     String cluster = CollectionUtils.isNotEmpty(invokers)
                             ?
                             (invokers.get(0).getUrl() != null ? invokers.get(0).getUrl().getParameter(CLUSTER_KEY, ZoneAwareCluster.NAME) :
@@ -415,7 +439,7 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
         URL consumerURL = new URL(CONSUMER_PROTOCOL, map.remove(REGISTER_IP_KEY), 0, map.get(INTERFACE_KEY), map);
         MetadataUtils.publishServiceDefinition(consumerURL);
 
-        // create service proxy
+        // 创建 Service 代理对象
         return (T) PROXY_FACTORY.getProxy(invoker, ProtocolUtils.isGeneric(generic));
     }
 
@@ -499,12 +523,15 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
     protected boolean shouldJvmRefer(Map<String, String> map) {
         URL tmpUrl = new URL("temp", "localhost", 0, map);
         boolean isJvmRefer;
+        // injvm 属性为空，不通过该属性判断
         if (isInjvm() == null) {
             // if a url is specified, don't do local reference
+            // 直连服务提供者
             if (url != null && url.length() > 0) {
                 isJvmRefer = false;
             } else {
                 // by default, reference local service if there is
+                // 通过 `tmpUrl` 判断，是否需要本地引用
                 isJvmRefer = InjvmProtocol.getInjvmProtocol().isInjvmRefer(tmpUrl);
             }
         } else {

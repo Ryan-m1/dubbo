@@ -406,15 +406,26 @@ public class DubboProtocol extends AbstractProtocol {
 
     @Override
     public <T> Invoker<T> protocolBindingRefer(Class<T> serviceType, URL url) throws RpcException {
+        // 初始化序列化优化器
         optimizeSerialization(url);
 
-        // create rpc invoker.
+        // 获得远程通信客户端数组
+        // 创建 DubboInvoker 对象
+        // create rpc invoker
         DubboInvoker<T> invoker = new DubboInvoker<T>(serviceType, url, getClients(url), invokers);
+        // 添加到 `invokers`
         invokers.add(invoker);
 
         return invoker;
     }
 
+
+    /**
+     * 获得连接服务提供者的远程通信客户端数组
+     *
+     * @param url 服务提供者 URL
+     * @return 远程通信客户端
+     */
     private ExchangeClient[] getClients(URL url) {
         // whether to share connection
         int connections = url.getParameter(CONNECTIONS_KEY, 0);
@@ -587,12 +598,13 @@ public class DubboProtocol extends AbstractProtocol {
      * @param url
      */
     private ExchangeClient initClient(URL url) {
-
+        // 校验 Client 的 Dubbo SPI 拓展是否存在
         // client type setting.
         String str = url.getParameter(CLIENT_KEY, url.getParameter(SERVER_KEY, DEFAULT_REMOTING_CLIENT));
 
+        // 设置编解码器为 Dubbo ，即 DubboCountCodec
         url = url.addParameter(CODEC_KEY, DubboCodec.NAME);
-        // enable heartbeat by default
+        // 默认开启 heartbeat
         url = url.addParameterIfAbsent(HEARTBEAT_KEY, String.valueOf(DEFAULT_HEARTBEAT));
 
         // BIO is not allowed since it has severe performance issue.
@@ -600,13 +612,16 @@ public class DubboProtocol extends AbstractProtocol {
             throw new RpcException("Unsupported client type: " + str + "," + " supported client type is " + StringUtils.join(ExtensionLoader.getExtensionLoader(Transporter.class).getSupportedExtensions(), " "));
         }
 
+        // 连接服务器，创建客户端
         ExchangeClient client;
         try {
-            // connection should be lazy
+            // 懒连接，创建 LazyConnectExchangeClient 对象
             if (url.getParameter(LAZY_CONNECT_KEY, false)) {
                 client = new LazyConnectExchangeClient(url, requestHandler);
 
-            } else {
+            }
+            // 直接连接，创建 HeaderExchangeClient 对象
+            else {
                 client = Exchangers.connect(url, requestHandler);
             }
 
