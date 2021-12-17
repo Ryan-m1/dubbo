@@ -25,13 +25,20 @@ import org.apache.dubbo.rpc.protocol.DelegateExporterMap;
  */
 class InjvmExporter<T> extends AbstractExporter<T> {
 
+    /**
+     * 服务键
+     */
     private final String key;
 
+    /**
+     * Exporter 集合
+     */
     private final DelegateExporterMap delegateExporterMap;
 
     InjvmExporter(Invoker<T> invoker, String key, DelegateExporterMap delegateExporterMap) {
         super(invoker);
         this.key = key;
+        // 添加到 Exporter 集合
         this.delegateExporterMap = delegateExporterMap;
     }
 
