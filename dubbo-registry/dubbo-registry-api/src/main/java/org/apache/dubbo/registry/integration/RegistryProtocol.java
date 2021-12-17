@@ -143,7 +143,15 @@ public class RegistryProtocol implements Protocol {
     // To solve the problem of RMI repeated exposure port conflicts, the services that have been exposed are no longer exposed.
     // providerurl <--> exporter
     private final ConcurrentMap<String, ExporterChangeableWrapper<?>> bounds = new ConcurrentHashMap<>();
+
+    /**
+     * Protocol 自适应拓展实现类，通过 Dubbo SPI 自动注入。
+     */
     protected Protocol protocol;
+
+    /**
+     * RegistryFactory 自适应拓展实现类，通过 Dubbo SPI 自动注入。
+     */
     protected RegistryFactory registryFactory;
     protected ProxyFactory proxyFactory;
 
@@ -256,8 +264,19 @@ public class RegistryProtocol implements Protocol {
         return serviceConfigurationListener.overrideUrl(providerUrl);
     }
 
+
+    /**
+     * 暴露服务。
+     * <p>
+     * 此处的 Local 指的是，本地启动服务，但是不包括向注册中心注册服务的意思。
+     *
+     * @param originInvoker 原始 Invoker
+     * @param <T>           泛型
+     * @return Exporter 对象
+     */
     @SuppressWarnings("unchecked")
     private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originInvoker, URL providerUrl) {
+        // 获得在 `bounds` 中的缓存 Key
         String key = getCacheKey(originInvoker);
 
         return (ExporterChangeableWrapper<T>) bounds.computeIfAbsent(key, s -> {

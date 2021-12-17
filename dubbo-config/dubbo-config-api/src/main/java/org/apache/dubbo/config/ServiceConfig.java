@@ -495,9 +495,12 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                         if (LOCAL_PROTOCOL.equalsIgnoreCase(url.getProtocol())) {
                             continue;
                         }
+                        // "dynamic" ：服务是否动态注册，如果设为false，注册后将显示后disable状态，需人工启用，并且服务提供者停止时，也不会自动取消册，需人工禁用。
                         url = url.addParameterIfAbsent(DYNAMIC_KEY, registryURL.getParameter(DYNAMIC_KEY));
+                        // 获得监控中心 URL
                         URL monitorUrl = ConfigValidationUtils.loadMonitor(this, registryURL);
                         if (monitorUrl != null) {
+                            //将监控中心的 URL 作为 "monitor" 参数添加到服务提供者的 URL 中，并且需要编码。通过这样的方式，服务提供者的 URL 中，包含了监控中心的配置。
                             url = url.addParameterAndEncoded(MONITOR_KEY, monitorUrl.toFullString());
                         }
                         if (logger.isInfoEnabled()) {
@@ -518,18 +521,24 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                         Invoker<?> invoker = PROXY_FACTORY.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(EXPORT_KEY, url.toFullString()));
                         DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
 
-                        //Invoker到Exporter的转换
+                        //使用 Protocol 暴露 Invoker 对象 ，Invoker到Exporter的转换
+                        //此处 Dubbo SPI 自适应的特性的好处就出来了，可以自动根据 URL 参数，获得对应的拓展实现。例如，invoker 传入后，根据 invoker.url 自动获得对应 Protocol 拓展实现为 DubboProtocol
                         Exporter<?> exporter = PROTOCOL.export(wrapperInvoker);
                         exporters.add(exporter);
                     }
-                } else {
+                }
+                //用于被服务消费者直连服务提供者
+                else {
                     if (logger.isInfoEnabled()) {
                         logger.info("Export dubbo service " + interfaceClass.getName() + " to url " + url);
                     }
+                    // 使用 ProxyFactory 创建 Invoker 对象
                     Invoker<?> invoker = PROXY_FACTORY.getInvoker(ref, (Class) interfaceClass, url);
+                    // 创建 DelegateProviderMetaDataInvoker 对象
                     DelegateProviderMetaDataInvoker wrapperInvoker = new DelegateProviderMetaDataInvoker(invoker, this);
-
+                    // 使用 Protocol 暴露 Invoker 对象
                     Exporter<?> exporter = PROTOCOL.export(wrapperInvoker);
+                    // 添加到 `exporters`
                     exporters.add(exporter);
                 }
 

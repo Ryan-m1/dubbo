@@ -204,6 +204,7 @@ public class ConfigValidationUtils {
                     address = ANYHOST_VALUE;
                 }
                 // 有效的地址  包括 address != N/A  "N/A" 代表不配置注册中心。
+                //当配置注册中心为 "N/A" 时，表示即使远程暴露服务，也不向注册中心注册。这种方式用于被服务消费者直连服务提供者
                 if (!RegistryConfig.NO_AVAILABLE.equalsIgnoreCase(address)) {
                     Map<String, String> map = new HashMap<String, String>();
                     // 将各种配置对象，添加到 `map` 集合中
@@ -266,6 +267,12 @@ public class ConfigValidationUtils {
         );
     }
 
+    /**
+     * 加载监控中心 URL
+     *
+     * @param registryURL 注册中心 URL
+     * @return 监控中心 URL
+     */
     public static URL loadMonitor(AbstractInterfaceConfig interfaceConfig, URL registryURL) {
         Map<String, String> map = new HashMap<String, String>();
         map.put(INTERFACE_KEY, MonitorService.class.getName());
