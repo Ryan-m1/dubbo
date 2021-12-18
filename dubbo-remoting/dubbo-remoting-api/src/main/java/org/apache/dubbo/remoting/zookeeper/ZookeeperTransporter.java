@@ -29,6 +29,12 @@ public interface ZookeeperTransporter {
 
     String CURATOR = "curator";
 
+    /**
+     * 连接创建 ZookeeperClient 对象
+     *
+     * @param url 注册中心地址
+     * @return ZookeeperClient 对象
+     */
     ZookeeperClient connect(URL url);
 
     static ZookeeperTransporter getExtension() {
