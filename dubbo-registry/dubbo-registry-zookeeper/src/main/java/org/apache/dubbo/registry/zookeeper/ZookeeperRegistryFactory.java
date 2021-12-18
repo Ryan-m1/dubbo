@@ -27,8 +27,18 @@ import org.apache.dubbo.remoting.zookeeper.ZookeeperTransporter;
  */
 public class ZookeeperRegistryFactory extends AbstractRegistryFactory {
 
+    /**
+     * Zookeeper 工厂
+     */
     private ZookeeperTransporter zookeeperTransporter;
 
+    /**
+     * 设置 Zookeeper 工厂
+     * <p>
+     * 该方法，通过 Dubbo SPI 注入
+     *
+     * @param zookeeperTransporter Zookeeper 工厂对象
+     */
     public ZookeeperRegistryFactory() {
         this.zookeeperTransporter = ZookeeperTransporter.getExtension();
     }

@@ -18,6 +18,7 @@ package org.apache.dubbo.common.bytecode;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
+
 import javassist.ClassPool;
 import javassist.CtMethod;
 import org.apache.dubbo.common.utils.ClassUtils;
@@ -38,6 +39,7 @@ import java.util.regex.Matcher;
 
 /**
  * Wrapper.
+ * Wrapper 抽象类，用于创建某个对象的方法调用的包装器，以避免反射调用，提高性能
  */
 public abstract class Wrapper {
     private static final Map<Class<?>, Wrapper> WRAPPER_MAP = new ConcurrentHashMap<Class<?>, Wrapper>(); //class wrapper map
@@ -168,9 +170,9 @@ public abstract class Wrapper {
         }
 
         Method[] methods = Arrays.stream(c.getMethods())
-                                 .filter(method -> allMethod.contains(ReflectUtils.getDesc(method)))
-                                 .collect(Collectors.toList())
-                                 .toArray(new Method[] {});
+                .filter(method -> allMethod.contains(ReflectUtils.getDesc(method)))
+                .collect(Collectors.toList())
+                .toArray(new Method[]{});
         // get all public method.
         boolean hasMethod = hasMethods(methods);
         if (hasMethod) {

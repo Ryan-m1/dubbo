@@ -43,6 +43,8 @@ import static org.apache.dubbo.rpc.cluster.Constants.REFER_KEY;
 
 /**
  * AbstractRegistryFactory. (SPI, Singleton, ThreadSafe)
+ * <p>
+ * 实现了 Registry 的容器管理
  *
  * @see org.apache.dubbo.registry.RegistryFactory
  */
