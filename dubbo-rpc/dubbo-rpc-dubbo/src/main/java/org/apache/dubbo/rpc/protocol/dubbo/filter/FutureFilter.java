@@ -38,6 +38,7 @@ import static org.apache.dubbo.rpc.protocol.dubbo.Constants.ASYNC_METHOD_INFO;
 
 /**
  * EventFilter
+ * 事件通知过滤器
  */
 @Activate(group = CommonConstants.CONSUMER)
 public class FutureFilter implements Filter, Filter.Listener {
@@ -46,6 +47,7 @@ public class FutureFilter implements Filter, Filter.Listener {
 
     @Override
     public Result invoke(final Invoker<?> invoker, final Invocation invocation) throws RpcException {
+        // 触发前置方法
         fireInvokeCallback(invoker, invocation);
         // need to configure if there's return value before the invocation in order to help invoker to judge if it's
         // necessary to return future.
@@ -66,6 +68,12 @@ public class FutureFilter implements Filter, Filter.Listener {
         fireThrowCallback(invoker, invocation, t);
     }
 
+    /**
+     * 触发前置方法
+     *
+     * @param invoker    Invoker 对象
+     * @param invocation Invocation 对象
+     */
     private void fireInvokeCallback(final Invoker<?> invoker, final Invocation invocation) {
         final AsyncMethodInfo asyncMethodInfo = getAsyncMethodInfo(invoker, invocation);
         if (asyncMethodInfo == null) {

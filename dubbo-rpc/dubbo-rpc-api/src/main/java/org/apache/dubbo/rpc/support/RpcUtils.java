@@ -86,7 +86,7 @@ public class RpcUtils {
                  *  of course we can change the serialization to use Type to create, but this work is to large....
                  */
                 String generic = invocation.getInvoker().getUrl().getParameter(GENERIC_KEY);
-                if(!ProtocolUtils.isGeneric(generic)){
+                if (!ProtocolUtils.isGeneric(generic)) {
                     String service = invocation.getInvoker().getUrl().getServiceInterface();
                     if (StringUtils.isNotEmpty(service)) {
                         Method method = getMethodByService(invocation, service);
@@ -129,13 +129,21 @@ public class RpcUtils {
         }
     }
 
+    /**
+     * 获得方法名
+     *
+     * @param invocation
+     * @return
+     */
     public static String getMethodName(Invocation invocation) {
+        // 泛化调用，第一个参数为方法名
         if ($INVOKE.equals(invocation.getMethodName())
                 && invocation.getArguments() != null
                 && invocation.getArguments().length > 0
                 && invocation.getArguments()[0] instanceof String) {
             return (String) invocation.getArguments()[0];
         }
+        // 普通调用，直接获得
         return invocation.getMethodName();
     }
 
@@ -231,6 +239,13 @@ public class RpcUtils {
         }
     }
 
+    /**
+     * 判断oneway单向调用
+     *
+     * @param url
+     * @param inv
+     * @return
+     */
     public static boolean isOneway(URL url, Invocation inv) {
         boolean isOneway;
         String config;

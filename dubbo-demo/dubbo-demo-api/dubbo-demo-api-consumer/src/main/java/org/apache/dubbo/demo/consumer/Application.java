@@ -26,11 +26,9 @@ import org.apache.dubbo.rpc.service.GenericService;
 
 public class Application {
     public static void main(String[] args) {
-        if (isClassic(args)) {
-            runWithRefer();
-        } else {
-            runWithBootstrap();
-        }
+        runWithRefer();
+        /*runWithBootstrap();*/
+
     }
 
     private static boolean isClassic(String[] args) {
@@ -54,8 +52,8 @@ public class Application {
 
         // generic invoke
         GenericService genericService = (GenericService) demoService;
-        Object genericInvokeResult = genericService.$invoke("sayHello", new String[] { String.class.getName() },
-                new Object[] { "dubbo generic invoke" });
+        Object genericInvokeResult = genericService.$invoke("sayHello", new String[]{String.class.getName()},
+                new Object[]{"dubbo generic invoke"});
         System.out.println(genericInvokeResult);
     }
 
