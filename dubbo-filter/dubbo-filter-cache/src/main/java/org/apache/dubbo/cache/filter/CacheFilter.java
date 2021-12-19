@@ -48,10 +48,10 @@ import static org.apache.dubbo.common.constants.FilterConstants.CACHE_KEY;
  *        3)&lt;dubbo:provider cache="expiring" /&gt;
  *        4)&lt;dubbo:consumer cache="jcache" /&gt;
  *
- *If cache type is defined in method level then method level type will get precedence. According to above provided
- *example, if service has two method, method1 and method2, method2 will have cache type as <b>threadlocal</b> where others will
- *be backed by <b>lru</b>
- *</pre>
+ * If cache type is defined in method level then method level type will get precedence. According to above provided
+ * example, if service has two method, method1 and method2, method2 will have cache type as <b>threadlocal</b> where others will
+ * be backed by <b>lru</b>
+ * </pre>
  *
  * @see org.apache.dubbo.rpc.Filter
  * @see org.apache.dubbo.cache.support.lru.LruCacheFactory
@@ -62,11 +62,18 @@ import static org.apache.dubbo.common.constants.FilterConstants.CACHE_KEY;
  * @see org.apache.dubbo.cache.support.threadlocal.ThreadLocalCache
  * @see org.apache.dubbo.cache.support.expiring.ExpiringCacheFactory
  * @see org.apache.dubbo.cache.support.expiring.ExpiringCache
- *
+ * <p>
+ * 实现 Filter 接口，缓存过滤器实现类
  */
 @Activate(group = {CONSUMER, PROVIDER}, value = CACHE_KEY)
 public class CacheFilter implements Filter {
 
+
+    /**
+     * CacheFactory$Adaptive 对象。
+     * <p>
+     * 通过 Dubbo SPI 机制，调用 {@link #setCacheFactory(CacheFactory)} 方法，进行注入
+     */
     private CacheFactory cacheFactory;
 
     /**
@@ -84,6 +91,7 @@ public class CacheFilter implements Filter {
      * If cache is configured, dubbo will invoke method on each method call. If cache value is returned by cache store
      * then it will return otherwise call the remote method and return value. If remote method's return value has error
      * then it will not cache the value.
+     *
      * @param invoker    service
      * @param invocation invocation.
      * @return Cache returned value if found by the underlying cache store. If cache miss it will call target method.
@@ -91,10 +99,15 @@ public class CacheFilter implements Filter {
      */
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        // 方法开启 Cache 功能
+        // 因为，一个服务里，可能只有部分方法开启了 Cache 功能
         if (cacheFactory != null && ConfigUtils.isNotEmpty(invoker.getUrl().getMethodParameter(invocation.getMethodName(), CACHE_KEY))) {
+            // 基于 URL + Method 为维度，获得 Cache 对象。
             Cache cache = cacheFactory.getCache(invoker.getUrl(), invocation);
             if (cache != null) {
+                // 获得 Cache Key
                 String key = StringUtils.toArgumentString(invocation.getArguments());
+                // 从缓存中获得结果。若存在，创建 RpcResult 对象。
                 Object value = cache.get(key);
                 if (value != null) {
                     if (value instanceof ValueWrapper) {
@@ -103,13 +116,16 @@ public class CacheFilter implements Filter {
                         return AsyncRpcResult.newDefaultAsyncResult(value, invocation);
                     }
                 }
+                // 服务调用
                 Result result = invoker.invoke(invocation);
+                // 若非异常结果，缓存结果
                 if (!result.hasException()) {
                     cache.put(key, new ValueWrapper(result.getValue()));
                 }
                 return result;
             }
         }
+        // 服务调用
         return invoker.invoke(invocation);
     }
 
@@ -122,7 +138,7 @@ public class CacheFilter implements Filter {
 
         private final Object value;
 
-        public ValueWrapper (Object value) {
+        public ValueWrapper(Object value) {
             this.value = value;
         }
 

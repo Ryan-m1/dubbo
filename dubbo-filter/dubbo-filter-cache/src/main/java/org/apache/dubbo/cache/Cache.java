@@ -20,23 +20,29 @@ package org.apache.dubbo.cache;
  * Cache interface to support storing and retrieval of value against a lookup key. It has two operation <b>get</b> and <b>put</b>.
  * <li><b>put</b>-Storing value against a key.</li>
  * <li><b>get</b>-Retrieval of object.</li>
+ *
  * @see org.apache.dubbo.cache.support.lru.LruCache
  * @see org.apache.dubbo.cache.support.jcache.JCache
  * @see org.apache.dubbo.cache.support.expiring.ExpiringCache
  * @see org.apache.dubbo.cache.support.threadlocal.ThreadLocalCache
+ * <p>
+ * 结果缓存 ，用于加速热门数据的访问速度，Dubbo 提供声明式缓存，以减少用户加缓存的工作量。
  */
 public interface Cache {
+
     /**
-     * API to store value against a key
-     * @param key  Unique identifier for the object being store.
-     * @param value Value getting store
+     * 添加键值
+     *
+     * @param key 键
+     * @param value 值
      */
     void put(Object key, Object value);
 
     /**
-     * API to return stored value using a key.
-     * @param key Unique identifier for cache lookup
-     * @return Return stored object against key
+     * 获得值
+     *
+     * @param key 键
+     * @return 值
      */
     Object get(Object key);
 

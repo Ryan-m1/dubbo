@@ -25,6 +25,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * </p>
  * When the data accessed for the first time, add it to history list. If the size of history list reaches max capacity, eliminate the earliest data (first in first out).
  * When the data already exists in the history list, and be accessed for the second time, then it will be put into cache.
+ * <p>
+ * 实现 LinkedHashMap 类，LRU 缓存实现类
  */
 public class LRUCache<K, V> extends LinkedHashMap<K, V> {
 
@@ -44,11 +46,20 @@ public class LRUCache<K, V> extends LinkedHashMap<K, V> {
     }
 
     public LRUCache(int maxCapacity) {
+        // 最后一个参数，按访问顺序(调用get方法)的链表
         super(16, DEFAULT_LOAD_FACTOR, true);
         this.maxCapacity = maxCapacity;
         this.preCache = new PreCache<>(maxCapacity);
     }
 
+    /**
+     * 重写 removeEldestEntry 方法返回 true 值，指定插入元素时移除最老的元素
+     * <p>
+     * 根据链表中元素的顺序可以分为：按插入顺序的链表，和按访问顺序(调用get方法)的链表。默认是按插入顺序排序，如果指定按访问顺序排序，那么调用get方法后，会将这次访问的元素移至链表尾部，不断访问可以形成按访问顺序排序的链表。
+     *
+     * @param eldest
+     * @return
+     */
     @Override
     protected boolean removeEldestEntry(java.util.Map.Entry<K, V> eldest) {
         return size() > maxCapacity;

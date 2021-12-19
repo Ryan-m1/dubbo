@@ -34,11 +34,10 @@ import static org.apache.dubbo.common.constants.FilterConstants.CACHE_KEY;
 public interface CacheFactory {
 
     /**
-     * CacheFactory implementation class needs to implement this return underlying cache instance for method against
-     * url and invocation.
-     * @param url
-     * @param invocation
-     * @return Instance of Cache containing cached value against method url and invocation.
+     * 获得缓存对象
+     *
+     * @param url URL 对象
+     * @return 缓存对象
      */
     @Adaptive(CACHE_KEY)
     Cache getCache(URL url, Invocation invocation);

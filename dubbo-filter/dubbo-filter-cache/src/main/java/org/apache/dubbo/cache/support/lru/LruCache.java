@@ -39,6 +39,8 @@ import java.util.Map;
  * @see LruCacheFactory
  * @see org.apache.dubbo.cache.support.AbstractCacheFactory
  * @see org.apache.dubbo.cache.filter.CacheFilter
+ * <p>
+ * 基于最近最少使用原则删除多余缓存，保持最热的数据被缓存。
  */
 public class LruCache implements Cache {
 
@@ -49,17 +51,21 @@ public class LruCache implements Cache {
 
     /**
      * Initialize LruCache, it uses constructor argument <b>cache.size</b> value as its storage max size.
-     *  If nothing is provided then it will use 1000 as default value.
+     * If nothing is provided then it will use 1000 as default value.
+     *
      * @param url A valid URL instance
      */
     public LruCache(URL url) {
+        // `"cache.size"` 配置项，设置缓存大小
         final int max = url.getParameter("cache.size", 1000);
+        // 创建 LRUCache 对象
         this.store = new LRUCache<>(max);
     }
 
     /**
      * API to store value against a key in the calling thread scope.
-     * @param key  Unique identifier for the object being store.
+     *
+     * @param key   Unique identifier for the object being store.
      * @param value Value getting store
      */
     @Override
@@ -69,6 +75,7 @@ public class LruCache implements Cache {
 
     /**
      * API to return stored value using a key against the calling thread specific store.
+     *
      * @param key Unique identifier for cache lookup
      * @return Return stored object against key
      */

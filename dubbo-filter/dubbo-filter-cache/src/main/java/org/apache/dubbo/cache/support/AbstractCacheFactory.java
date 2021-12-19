@@ -40,7 +40,9 @@ import static org.apache.dubbo.common.constants.CommonConstants.METHOD_KEY;
 public abstract class AbstractCacheFactory implements CacheFactory {
 
     /**
-     * This is used to store factory level-1 cached data.
+     * Cache 集合
+     * <p>
+     * key：URL
      */
     private final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
 
@@ -57,6 +59,7 @@ public abstract class AbstractCacheFactory implements CacheFactory {
     public Cache getCache(URL url, Invocation invocation) {
         url = url.addParameter(METHOD_KEY, invocation.getMethodName());
         String key = url.toFullString();
+        // 获得 Cache 对象
         Cache cache = caches.get(key);
 
         // get from cache first.
@@ -70,7 +73,7 @@ public abstract class AbstractCacheFactory implements CacheFactory {
             if (null != cache) {
                 return cache;
             }
-
+            // 不存在，创建 Cache 对象，并缓存
             cache = createCache(url);
             caches.put(key, cache);
         }
@@ -79,10 +82,10 @@ public abstract class AbstractCacheFactory implements CacheFactory {
     }
 
     /**
-     * Takes url as an method argument and return new instance of cache store implemented by AbstractCacheFactory subclass.
+     * 创建 Cache 对象
      *
-     * @param url url of the method
-     * @return Create and return new instance of cache store used as storage for caching return values.
+     * @param url URL
+     * @return Cache 对象
      */
     protected abstract Cache createCache(URL url);
 
