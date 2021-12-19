@@ -33,7 +33,8 @@ import java.util.List;
  * Usually used to write audit logs and other operations
  *
  * <a href="http://en.wikipedia.org/wiki/Fail-safe">Fail-safe</a>
- *
+ * <p>
+ * 失败安全，出现异常时，直接忽略。通常用于写入审计日志等操作。
  */
 public class FailsafeClusterInvoker<T> extends AbstractClusterInvoker<T> {
     private static final Logger logger = LoggerFactory.getLogger(FailsafeClusterInvoker.class);

@@ -30,6 +30,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * If the weights are different then it will use random.nextInt(w1 + w2 + ... + wn)
  * Note that if the performance of the machine is better than others, you can set a larger weight.
  * If the performance is not so good, you can set a smaller weight.
+ * <p>
+ * 随机，按权重设置随机概率。
+ * 在一个截面上碰撞的概率高，但调用量越大分布越均匀，而且按概率使用权重后也比较均匀，有利于动态调整提供者权重。
  */
 public class RandomLoadBalance extends AbstractLoadBalance {
 
@@ -37,8 +40,9 @@ public class RandomLoadBalance extends AbstractLoadBalance {
 
     /**
      * Select one invoker between a list using a random criteria
-     * @param invokers List of possible invokers
-     * @param url URL
+     *
+     * @param invokers   List of possible invokers
+     * @param url        URL
      * @param invocation Invocation
      * @param <T>
      * @return The selected invoker

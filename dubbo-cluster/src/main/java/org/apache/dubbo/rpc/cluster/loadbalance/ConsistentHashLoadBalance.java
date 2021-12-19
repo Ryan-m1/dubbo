@@ -33,6 +33,9 @@ import static org.apache.dubbo.common.constants.CommonConstants.COMMA_SPLIT_PATT
 
 /**
  * ConsistentHashLoadBalance
+ * <p>
+ * 一致性 Hash，相同参数的请求总是发到同一提供者。
+ * 当某一台提供者挂时，原本发往该提供者的请求，基于虚拟节点，平摊到其它提供者，不会引起剧烈变动。
  */
 public class ConsistentHashLoadBalance extends AbstractLoadBalance {
     public static final String NAME = "consistenthash";
@@ -67,10 +70,11 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
     /**
      * get hash code of invokers
      * Make this method to public in order to use this method in test case
+     *
      * @param invokers
      * @return
      */
-    public <T> int getCorrespondingHashCode(List<Invoker<T>> invokers){
+    public <T> int getCorrespondingHashCode(List<Invoker<T>> invokers) {
         return invokers.hashCode();
     }
 
@@ -196,9 +200,9 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
             return entry.getValue();
         }
 
-        private Map.Entry<Long, Invoker<T>> getNextInvokerNode(TreeMap<Long, Invoker<T>> virtualInvokers, Map.Entry<Long, Invoker<T>> entry){
+        private Map.Entry<Long, Invoker<T>> getNextInvokerNode(TreeMap<Long, Invoker<T>> virtualInvokers, Map.Entry<Long, Invoker<T>> entry) {
             Map.Entry<Long, Invoker<T>> nextEntry = virtualInvokers.higherEntry(entry.getKey());
-            if(nextEntry == null){
+            if (nextEntry == null) {
                 return virtualInvokers.firstEntry();
             }
             return nextEntry;

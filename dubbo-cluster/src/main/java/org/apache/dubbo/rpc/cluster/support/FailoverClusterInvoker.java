@@ -42,7 +42,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.RETRIES_KEY;
  * Note that retry causes latency.
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Failover">Failover</a>
- *
+ * <p>
+ * 失败自动切换，当出现失败，重试其它服务器。通常用于读操作，但重试会带来更长延迟。可通过 retries="2" 来设置重试次数(不含第一次)。
  */
 public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
