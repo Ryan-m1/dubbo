@@ -50,6 +50,11 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
      */
     public static final String HASH_ARGUMENTS = "hash.arguments";
 
+    /**
+     * 服务方法与一致性哈希选择器的映射
+     * <p>
+     * KEY：serviceKey + "." + methodName
+     */
     private final ConcurrentMap<String, ConsistentHashSelector<?>> selectors = new ConcurrentHashMap<String, ConsistentHashSelector<?>>();
 
     @SuppressWarnings("unchecked")
@@ -58,7 +63,9 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
         String methodName = RpcUtils.getMethodName(invocation);
         String key = invokers.get(0).getUrl().getServiceKey() + "." + methodName;
         // using the hashcode of list to compute the hash only pay attention to the elements in the list
+        // 基于 invokers 集合，根据对象内存地址来计算定义哈希值
         int invokersHashCode = getCorrespondingHashCode(invokers);
+        // 获得 ConsistentHashSelector 对象。若为空，或者定义哈希值变更（说明 invokers 集合发生变化），进行创建新的 ConsistentHashSelector 对象
         ConsistentHashSelector<T> selector = (ConsistentHashSelector<T>) selectors.get(key);
         if (selector == null || selector.identityHashCode != invokersHashCode) {
             selectors.put(key, new ConsistentHashSelector<T>(invokers, methodName, invokersHashCode));

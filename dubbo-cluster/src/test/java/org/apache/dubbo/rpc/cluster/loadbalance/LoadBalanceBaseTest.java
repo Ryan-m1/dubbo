@@ -77,7 +77,7 @@ public class LoadBalanceBaseTest {
 
         invocation = mock(Invocation.class);
         given(invocation.getMethodName()).willReturn("method1");
-        given(invocation.getArguments()).willReturn(new Object[] {"arg1","arg2","arg3"});
+        given(invocation.getArguments()).willReturn(new Object[]{"arg1", "arg2", "arg3"});
 
         invoker1 = mock(Invoker.class);
         invoker2 = mock(Invoker.class);
@@ -143,7 +143,7 @@ public class LoadBalanceBaseTest {
         Assertions.assertEquals(1, calculateDefaultWarmupWeight(6 * 1000));
         Assertions.assertEquals(1, calculateDefaultWarmupWeight(12 * 1000));
         Assertions.assertEquals(1, calculateDefaultWarmupWeight(60 * 1000));
-        Assertions.assertEquals(4, calculateDefaultWarmupWeight(2* 60 * 1000));
+        Assertions.assertEquals(4, calculateDefaultWarmupWeight(2 * 60 * 1000));
         Assertions.assertEquals(9, calculateDefaultWarmupWeight(3 * 60 * 1000));
         Assertions.assertEquals(16, calculateDefaultWarmupWeight(4 * 60 * 1000));
         Assertions.assertEquals(25, calculateDefaultWarmupWeight(5 * 60 * 1000));
@@ -163,10 +163,20 @@ public class LoadBalanceBaseTest {
 
     /**
      * handle default data
+     * <p>
+     * 根据calculateWarmupWeight()方法实现可知，随着provider的启动时间越来越长，慢慢提升权重直到weight，且权重最小值为1，所以：
+     * <p>
+     * 如果 provider 运行了 1 分钟，那么 weight 为 10，即只有最终需要承担的 10% 流量；
+     * 如果 provider 运行了 2 分钟，那么 weight 为 20，即只有最终需要承担的 20% 流量；
+     * 如果 provider 运行了 5 分钟，那么 weight 为 50，即只有最终需要承担的 50% 流量；
+     * … …
+     * 如果 provider 运行了 10 分钟，那么 weight 为 100，即只有最终需要承担的 100% 流量；
      *
      * @return
      */
     private static int calculateDefaultWarmupWeight(int uptime) {
+        //"weight" 配置项，默认为 100 。
+        //"warmup" 配置项，默认为 10 * 60 * 1000 = 10 分钟。
         return AbstractLoadBalance.calculateWarmupWeight(uptime, DEFAULT_WARMUP, DEFAULT_WEIGHT);
     }
 
@@ -212,8 +222,8 @@ public class LoadBalanceBaseTest {
         }
     }
 
-    protected List<Invoker<LoadBalanceBaseTest>> weightInvokers = new ArrayList<Invoker<LoadBalanceBaseTest>>();
-    protected List<Invoker<LoadBalanceBaseTest>> weightInvokersSR= new ArrayList<Invoker<LoadBalanceBaseTest>>();
+    protected List<Invoker<LoadBalanceBaseTest>> weightInvokers = new ArrayList<>();
+    protected List<Invoker<LoadBalanceBaseTest>> weightInvokersSR = new ArrayList<Invoker<LoadBalanceBaseTest>>();
 
     protected Invoker<LoadBalanceBaseTest> weightInvoker1;
     protected Invoker<LoadBalanceBaseTest> weightInvoker2;
@@ -286,7 +296,7 @@ public class LoadBalanceBaseTest {
         Map<Invoker, InvokeResult> counter = new ConcurrentHashMap<Invoker, InvokeResult>();
         AbstractLoadBalance lb = getLoadBalance(loadbalanceName);
         int totalWeight = 0;
-        for (int i = 0; i < weightInvokers.size(); i ++) {
+        for (int i = 0; i < weightInvokers.size(); i++) {
             InvokeResult invokeResult = new InvokeResult(lb.getWeight(weightInvokers.get(i), weightTestInvocation));
             counter.put(weightInvokers.get(i), invokeResult);
             totalWeight += invokeResult.getWeight();

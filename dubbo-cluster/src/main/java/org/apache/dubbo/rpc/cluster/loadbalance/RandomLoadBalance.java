@@ -40,6 +40,21 @@ public class RandomLoadBalance extends AbstractLoadBalance {
 
     /**
      * Select one invoker between a list using a random criteria
+     * <p>
+     * 假定有3台dubbo provider:
+     * <p>
+     * 10.0.0.1:20884, weight=2
+     * 10.0.0.1:20886, weight=3
+     * 10.0.0.1:20888, weight=4
+     * 随机算法的实现：
+     * totalWeight=9;
+     * <p>
+     * 假设offset=1（即random.nextInt(9)=1）
+     * 1-2=-1<0？是，所以选中 10.0.0.1:20884, weight=2
+     * 假设offset=4（即random.nextInt(9)=4）
+     * 4-2=2<0？否，这时候offset=2， 2-3<0？是，所以选中 10.0.0.1:20886, weight=3
+     * 假设offset=7（即random.nextInt(9)=7）
+     * 7-2=5<0？否，这时候offset=5， 5-3=2<0？否，这时候offset=2， 2-4<0？是，所以选中 10.0.0.1:20888, weight=4
      *
      * @param invokers   List of possible invokers
      * @param url        URL
@@ -56,8 +71,10 @@ public class RandomLoadBalance extends AbstractLoadBalance {
         // the maxWeight of every invokers, the minWeight = 0 or the maxWeight of the last invoker
         int[] weights = new int[length];
         // The sum of weights
+        // 计算总权限
         int totalWeight = 0;
         for (int i = 0; i < length; i++) {
+            // 获得权重
             int weight = getWeight(invokers.get(i), invocation);
             // Sum
             totalWeight += weight;
@@ -67,16 +84,20 @@ public class RandomLoadBalance extends AbstractLoadBalance {
                 sameWeight = false;
             }
         }
+        // 权重不相等，随机后，判断在哪个 Invoker 的权重区间中
         if (totalWeight > 0 && !sameWeight) {
+            // 随机
             // If (not every invoker has the same weight & at least one invoker's weight>0), select randomly based on totalWeight.
             int offset = ThreadLocalRandom.current().nextInt(totalWeight);
             // Return a invoker based on the random value.
+            // 区间判断
             for (int i = 0; i < length; i++) {
                 if (offset < weights[i]) {
                     return invokers.get(i);
                 }
             }
         }
+        // 权重相等，平均随机
         // If all invokers have the same weight value or totalWeight=0, return evenly.
         return invokers.get(ThreadLocalRandom.current().nextInt(length));
     }
